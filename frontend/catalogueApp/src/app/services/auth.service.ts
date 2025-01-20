@@ -82,7 +82,11 @@ export class AuthService {
     return this.currentUser;
   }
 
-  deleteAccount(): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/utilisateur/delete`);
+  updateUser(user: any) {
+    return this.http.put(`/api/users/${user.id}`, user);
+  }
+
+  deleteAccount() {
+    return this.http.delete('/api/users/me');
   }
 }

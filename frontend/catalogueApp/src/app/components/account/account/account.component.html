@@ -16,10 +16,37 @@
     <!-- Section Informations personnelles -->
     <div *ngIf="currentSection === 'personalInfo'">
       <h3>Informations personnelles</h3>
-      <p><strong>Nom :</strong> {{ user.nom }}</p>
-      <p><strong>Prénom :</strong> {{ user.prenom }}</p>
-      <p><strong>Email :</strong> {{ user.email || 'Non renseigné' }}</p>
-      <button (click)="editPersonalInfo()">Modifier mes informations</button>
+
+      <form *ngIf="isEditingPersonalInfo" (ngSubmit)="onUpdatePersonalInfo()">
+        <label for="nom">Nom :</label>
+        <input id="nom" [(ngModel)]="editableUser.nom" name="nom" required />
+
+        <label for="prenom">Prénom :</label>
+        <input id="prenom" [(ngModel)]="editableUser.prenom" name="prenom" required />
+
+        <label for="email">Email :</label>
+        <input id="email" [(ngModel)]="editableUser.email" name="email" type="email" required />
+
+        <label for="adresse">Adresse :</label>
+        <input id="adresse" [(ngModel)]="editableUser.adresse" name="adresse" />
+
+        <label for="telephone">Téléphone :</label>
+        <input id="telephone" [(ngModel)]="editableUser.telephone" name="telephone" type="text" />
+
+        <div class="form-actions">
+          <button type="submit">Sauvegarder</button>
+          <button type="button" (click)="cancelEdit()">Annuler</button>
+        </div>
+      </form>
+
+      <div *ngIf="!isEditingPersonalInfo">
+        <p><strong>Nom :</strong> {{ user.nom }}</p>
+        <p><strong>Prénom :</strong> {{ user.prenom }}</p>
+        <p><strong>Email :</strong> {{ user.email || 'Non renseigné' }}</p>
+        <p><strong>Adresse :</strong> {{ user.adresse || 'Non renseignée' }}</p>
+        <p><strong>Téléphone :</strong> {{ user.telephone || 'Non renseigné' }}</p>
+        <button (click)="enableEdit()">Modifier mes informations</button>
+      </div>
     </div>
 
     <!-- Section Cartes de crédit -->
