@@ -24,10 +24,9 @@ export class AuthService {
   login(credentials: { login: string; password: string }): Observable<any> {
     return this.http.post(`${environment.apiUrl}/utilisateur/login`, credentials).pipe(
       tap((response: any) => {
-        console.log('Login Response:', response);
         if (response.token) {
           this.storeAccessToken(response.token);
-          this.setCurrentUser(response.user); // Assurez-vous que l'API renvoie les informations de l'utilisateur
+          this.setCurrentUser(response.user);
           this.isAuthenticatedSubject.next(true);
         } else {
           console.error('Token non trouvé dans la réponse');
@@ -81,5 +80,9 @@ export class AuthService {
       this.currentUser = storedUser ? JSON.parse(storedUser) : null;
     }
     return this.currentUser;
+  }
+
+  deleteAccount(): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/utilisateur/delete`);
   }
 }

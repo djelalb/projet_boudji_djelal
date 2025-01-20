@@ -1,4 +1,3 @@
-// cart.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Store, Select } from '@ngxs/store';
 import { CartState, RemoveFromCart, UpdateQuantity, CartItem } from '../../state/cart.state';
@@ -38,7 +37,7 @@ export class CartComponent implements OnInit {
 
   updateQuantity(productId: number, newQuantity: number): void {
     if (!productId) return;
-    
+
     if (newQuantity <= 0) {
       this.removeFromCart(productId);
     } else {

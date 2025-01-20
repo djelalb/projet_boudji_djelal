@@ -13,13 +13,18 @@ import { ApiHttpInterceptor } from './app/interceptors/api-http.interceptor';
 import { SignupComponent } from './app/components/account/signup/signup.component';
 import { LoginComponent } from './app/components/account/login/login.component';
 import { AccountComponent } from './app/components/account/account/account.component';
+import { AuthGuard } from './app/services/auth.guard';
 
 const routes: Routes = [
   { path: '', component: CatalogueComponent },
   { path: 'cart', component: CartComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'account', component: AccountComponent },
+  {
+    path: 'account',
+    component: AccountComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 
 bootstrapApplication(AppComponent, {

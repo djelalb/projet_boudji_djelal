@@ -1,4 +1,48 @@
 <div class="account-container" *ngIf="user">
-  <h2>Bienvenue, {{ user.login }}</h2>
-  <button (click)="logout()">Se déconnecter</button>
+  <a routerLink="/" class="home-icon">
+    <i class="fas fa-home"></i>
+  </a>
+  <h2>Bienvenue, {{ user.prenom }} {{ user.nom }}</h2>
+  <p>Nom d'utilisateur : {{ user.login }}</p>
+
+  <div class="account-nav">
+    <button (click)="showSection('personalInfo')">Mes informations</button>
+    <button (click)="showSection('creditCards')">Cartes de crédit</button>
+    <button (click)="showSection('orders')">Mes commandes</button>
+    <button (click)="showSection('deleteAccount')">Supprimer mon compte</button>
+  </div>
+
+  <div class="account-content">
+    <!-- Section Informations personnelles -->
+    <div *ngIf="currentSection === 'personalInfo'">
+      <h3>Informations personnelles</h3>
+      <p><strong>Nom :</strong> {{ user.nom }}</p>
+      <p><strong>Prénom :</strong> {{ user.prenom }}</p>
+      <p><strong>Email :</strong> {{ user.email || 'Non renseigné' }}</p>
+      <button (click)="editPersonalInfo()">Modifier mes informations</button>
+    </div>
+
+    <!-- Section Cartes de crédit -->
+    <div *ngIf="currentSection === 'creditCards'">
+      <h3>Cartes de crédit enregistrées</h3>
+      <p>Pas encore de carte enregistrée.</p>
+      <button (click)="addCreditCard()">Ajouter une carte</button>
+    </div>
+
+    <!-- Section Commandes -->
+    <div *ngIf="currentSection === 'orders'">
+      <h3>Mes commandes</h3>
+      <p>Vous n'avez pas encore passé de commande.</p>
+      <button (click)="viewOrderHistory()">Voir l'historique des commandes</button>
+    </div>
+
+    <!-- Section Suppression du compte -->
+    <div *ngIf="currentSection === 'deleteAccount'">
+      <h3>Supprimer mon compte</h3>
+      <p>Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.</p>
+      <button (click)="confirmDeleteAccount()">Supprimer mon compte</button>
+    </div>
+  </div>
+
+  <button class="logout-button" (click)="logout()">Se déconnecter</button>
 </div>
