@@ -1,0 +1,23 @@
+Entity\Utilisateurs:
+  type: entity
+  table: utilisateurs
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    nom:
+      type: string
+      length: 255
+    prenom:
+      type: string
+      length: 255
+    login:
+      type: string
+      length: 50
+      nullable: true
+    pass:
+      type: string
+      length: 50
+      nullable: true 

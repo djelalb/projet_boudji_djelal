@@ -1,0 +1,23 @@
+Entity\Produits:
+  type: entity
+  table: produits
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    name:
+      type: string
+      length: 255
+    price:
+      type: decimal
+      precision: 10
+      scale: 2
+    category:
+      type: string
+      length: 255
+    image:
+      type: string
+      length: 255
+      nullable: true 
