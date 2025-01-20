@@ -1,7 +1,8 @@
 <?php
+
+use Tuupola\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Tuupola\Middleware\HttpBasicAuthentication;
 use \Firebase\JWT\JWT;
 
 const JWT_SECRET = "TP-CNAM";
@@ -35,14 +36,24 @@ $options = [
     "secure" => false,
     "algorithm" => ["HS256"],
     "secret" => JWT_SECRET,
-    "path" => ["/api"],
-    "ignore" => ["/api/hello", "/api/utilisateur/login"],
+    "path" => ["/api"], // Applique le middleware à toutes les routes /api
+    "ignore" => [
+        "/api/hello", 
+        "/api/utilisateur/login", 
+        "/api/catalogue", 
+        "/api/catalogue/{filtre}"
+    ], // Routes accessibles sans JWT
     "error" => function ($response, $arguments) {
         $data = ['error' => 'JWT non valide'];
-        $response = $response->withStatus(401);
-        return $response->withHeader("Content-Type", "application/json")->write(json_encode($data));
+        $response = $response->withStatus(401)
+            ->withHeader("Content-Type", "application/json");
+        $response->getBody()->write(json_encode($data));
+        return $response;
     }
 ];
+
+// Ajout du middleware au framework Slim
+$app->add(new JwtAuthentication($options));
 
 // Fonction pour ajouter les headers CORS et de contenu
 function addHeaders(Response $response): Response {
@@ -53,7 +64,3 @@ function addHeaders(Response $response): Response {
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
         ->withHeader('Access-Control-Expose-Headers', 'Authorization');
 }
-
-$app->add(new Tuupola\Middleware\JwtAuthentication($options));
-
-

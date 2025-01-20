@@ -134,9 +134,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		}
 		
 		$login = $body['login'] ?? "";
-		$pass = $body['pass'] ?? "";
+		$password = $body['password'] ?? "";
 		
-		error_log("Login: " . $login . ", Password: " . $pass);
+		error_log("Login: " . $login . ", Password: " . $password);
 
 		// Vérification de l'entity manager
 		if (!$entityManager) {
@@ -147,7 +147,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			$userRepository = $entityManager->getRepository('Entity\Utilisateurs');
 			error_log("Repository obtenu");
 			
-			$user = $userRepository->findOneBy(['login' => $login, 'pass' => $pass]);
+			$user = $userRepository->findOneBy(['login' => $login, 'password' => $password]);
 			error_log("Recherche utilisateur effectuée");
 			
 			if ($user) {
@@ -179,3 +179,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	    return addHeaders($response);
 	}
 
+	$app->options('/api/utilisateur/login', function (Request $request, Response $response, $args) {
+		return addHeaders($response); 
+	});

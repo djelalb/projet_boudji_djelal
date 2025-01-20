@@ -17,7 +17,7 @@ Entity\Utilisateurs:
       type: string
       length: 50
       nullable: true
-    pass:
+    password:
       type: string
       length: 50
       nullable: true 
