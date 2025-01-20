@@ -1,0 +1,8 @@
+<div class="search-container">
+    <input [(ngModel)]="searchTerm" placeholder="Rechercher par nom" />
+    <input [(ngModel)]="searchCategory" placeholder="Rechercher par catégorie" />
+    <input type="number" [(ngModel)]="minPrice" placeholder="Prix minimum" />
+    <input type="number" [(ngModel)]="maxPrice" placeholder="Prix maximum" />
+    <button (click)="search()">Rechercher</button>
+    <button class="reset-btn" (click)="reset()">Réinitialiser</button>
+</div>

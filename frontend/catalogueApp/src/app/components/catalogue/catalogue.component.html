@@ -1,0 +1,42 @@
+<div class="search-container">
+    <app-search (searchEvent)="filterProducts($event)"></app-search>
+</div>
+
+<div *ngIf="isLoading" class="loader-container">
+    <div class="loader"></div>
+</div>
+
+<div *ngIf="!isLoading && paginatedProducts.length === 0" class="alert alert-info">
+    Aucun produit ne correspond à votre recherche.
+</div>
+
+<div class="product-container" *ngIf="!isLoading && paginatedProducts.length > 0">
+    <div class="product-card" *ngFor="let product of paginatedProducts">
+        <div class="product-card-inner">
+            <img [src]="product.image" alt="{{ product.name }}" class="product-image" />
+            <div class="product-info">
+                <h2 class="product-name">{{ product.name }}</h2>
+                <p class="product-category">{{ product.category }}</p>
+                <p class="product-price">{{ product.price | currency:'EUR':'symbol' }}</p>
+                <div class="quantity-selector">
+                    <button (click)="decrementQuantity(product)">-</button>
+                    <span>{{ getQuantity(product) }}</span>
+                    <button (click)="incrementQuantity(product)">+</button>
+                </div>
+                <button (click)="addToCart(product)">Ajouter au panier</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pagination">
+    <button (click)="changePage(1)" [disabled]="currentPage === 1">Première</button>
+    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Précédent</button>
+
+    <ng-container *ngFor="let page of [].constructor(maxPageNumber); let i = index">
+        <button (click)="changePage(i + 1)" [disabled]="currentPage === i + 1">{{ i + 1 }}</button>
+    </ng-container>
+
+    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === maxPageNumber">Suivant</button>
+    <button (click)="changePage(maxPageNumber)" [disabled]="currentPage === maxPageNumber">Dernière</button>
+</div>

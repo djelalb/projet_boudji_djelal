@@ -1,0 +1,58 @@
+<div class="cart-page">
+  <h1 class="cart-title">Votre Panier</h1>
+
+  <div class="cart-container" *ngIf="(cartItems$ | async) as cartItems">
+    <div *ngIf="cartItems && cartItems.length > 0; else emptyCart" class="cart-item-list">
+      <div class="cart-item" *ngFor="let item of cartItems">
+        <ng-container *ngIf="item && item.product">
+          <div class="cart-item-image">
+            <img [src]="item.product.image || ''" [alt]="item.product.name || ''" />
+          </div>
+          <div class="cart-item-details">
+            <h3 class="cart-item-name">{{ item.product.name }}</h3>
+            <p class="cart-item-price">
+              {{ item.product.price | currency: 'EUR':'symbol' }} x {{ item.quantity || 1 }}
+            </p>
+            <p class="cart-item-subtotal">
+              Sous-total: {{ ((item.product.price || 0) * (item.quantity || 1)) | currency: 'EUR':'symbol' }}
+            </p>
+            <div class="quantity-controls">
+              <button (click)="updateQuantity(item.product.id, (item.quantity || 1) - 1)">-</button>
+              <span>{{ item.quantity || 1 }}</span>
+              <button (click)="updateQuantity(item.product.id, (item.quantity || 1) + 1)">+</button>
+            </div>
+            <button class="cart-item-remove" (click)="removeFromCart(item.product.id)">
+              Supprimer
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Total et actions -->
+      <div class="cart-summary" *ngIf="(total$ | async) as total">
+        <div class="cart-total">
+          <span>Total</span>
+          <span class="total-amount">{{ total | currency: 'EUR':'symbol' }}</span>
+        </div>
+        <div class="cart-actions">
+          <button class="cart-button secondary" routerLink="">
+            <i class="fas fa-arrow-left"></i> Continuer vos achats
+          </button>
+          <button class="cart-button primary">
+            <i class="fas fa-check"></i> Valider la commande
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyCart>
+      <div class="empty-cart">
+        <i class="fas fa-shopping-cart"></i>
+        <p>Votre panier est vide</p>
+        <button class="cart-button secondary" routerLink="">
+          Découvrir nos produits
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</div>

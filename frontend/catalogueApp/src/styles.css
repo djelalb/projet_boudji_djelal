@@ -1,0 +1,35 @@
+/* Reset de marges et padding par défaut */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #05162b;
+}
+
+/* Configuration de la police globale */
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: #f0f0f5;
+}
+
+/* Boutons et éléments de formulaire */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+/* Espacement pour toute la page */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Effet global pour une apparence sombre */
+.dark-bg {
+    background-color: #1e1e2f;
+    color: #f0f0f5;
+}

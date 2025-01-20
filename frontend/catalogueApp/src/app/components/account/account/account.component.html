@@ -1,0 +1,4 @@
+<div class="account-container" *ngIf="user">
+  <h2>Bienvenue, {{ user.login }}</h2>
+  <button (click)="logout()">Se déconnecter</button>
+</div>

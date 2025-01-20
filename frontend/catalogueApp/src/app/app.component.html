@@ -1,0 +1,20 @@
+<ng-container *ngIf="isSpecialRoute(); else mainLayout">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<ng-template #mainLayout>
+  <div class="header">
+    <h1>Catalogue de Produits</h1>
+    <div class="nav-buttons">
+      <a routerLink="/cart" class="cart-icon">
+        🛒
+        <ng-container *ngIf="cartCount$ | async as count">
+          <span class="cart-count" *ngIf="count > 0">{{count}}</span>
+        </ng-container>
+      </a>
+      <a routerLink="/account" class="account-icon">👤</a>
+    </div>
+  </div>
+
+  <app-catalogue></app-catalogue>
+</ng-template>

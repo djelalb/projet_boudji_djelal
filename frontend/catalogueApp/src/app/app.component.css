@@ -1,0 +1,128 @@
+/* Typographie et couleurs de base */
+
+/* Cacher les sections globales sur la page du panier */
+body.cart-active .header, 
+body.cart-active .main-container {
+    display: none;
+}
+
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #f0f0f5;
+    background-color: #1e1e2f;
+    margin: 0;
+}
+
+h1 {
+    text-align: center;
+    margin: 0;
+    font-size: 2.2rem;
+    color: #e9c46a;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+    color: #e9c46a;
+}
+
+/* Titre principal */
+.main-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #e76f51;
+    text-align: center;
+    margin-top: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #333;
+}
+
+/* Liens */
+a {
+    color: #e9c46a;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #e76f51;
+}
+
+/* Conteneur principal */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Alertes */
+.alert {
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+    color: #ffffff;
+    background-color: #e63946;
+    text-align: center;
+}
+
+.header {
+    position: relative;
+    padding: 20px;
+}
+
+.nav-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.account-icon {
+    font-size: 1.5rem;
+    color: #e9c46a;
+    transition: color 0.3s ease;
+}
+
+.account-icon:hover {
+    color: #e76f51;
+}
+
+.cart-icon {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #e9c46a;
+    padding: 10px;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+}
+
+.cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 0.8rem;
+    background-color: #e76f51;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-icon:hover {
+    color: #e76f51;
+}
