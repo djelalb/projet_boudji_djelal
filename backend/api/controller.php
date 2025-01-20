@@ -105,80 +105,86 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	    $userRepository = $entityManager->getRepository('user');
 	    $user = $userRepository->findOneBy(array('login' => $login));
 	    if ($user) {
-		$data = array('nom' => $user->getNom(), 'prenom' => $user->getPrenom());
-		$response = addHeaders ($response);
-		$response = createJwT ($response);
-		$response->getBody()->write(json_encode($data));
+			$data = array('login' => $user->getLogin(), 'nom' => $user->getNom(), 'prenom' => $user->getPrenom());
+			$response = addHeaders ($response);
+			$response = createJwT ($response);
+			$response->getBody()->write(json_encode($data));
 	    } else {
-		$response = $response->withStatus(404);
+			$response = $response->withStatus(404);
 	    }
 
 	    return addHeaders ($response);
 	}
 
 	// APi d'authentification générant un JWT
-	function postLogin (Request $request, Response $response, $args) {   
-	    global $entityManager;
-	    try {
-		// Log début de la fonction
-		error_log("Début postLogin");
-		
-		// Vérification du body
-		$body = $request->getParsedBody();
-		error_log("Body reçu : " . json_encode($body));
-		
-		// Si le body est null, essayons de le lire directement
-		if ($body === null) {
-			$body = json_decode($request->getBody()->getContents(), true);
-			error_log("Body après json_decode : " . json_encode($body));
-		}
-		
-		$login = $body['login'] ?? "";
-		$password = $body['password'] ?? "";
-		
-		error_log("Login: " . $login . ", Password: " . $password);
-
-		// Vérification de l'entity manager
-		if (!$entityManager) {
-			throw new Exception("EntityManager non initialisé");
-		}
-		
+	function postLogin (Request $request, Response $response, $args) {
+		global $entityManager;
 		try {
-			$userRepository = $entityManager->getRepository('Entity\Utilisateurs');
-			error_log("Repository obtenu");
-			
-			$user = $userRepository->findOneBy(['login' => $login, 'password' => $password]);
-			error_log("Recherche utilisateur effectuée");
-			
-			if ($user) {
-				error_log("Utilisateur trouvé");
-				$response = addHeaders($response);
-				$response = createJwT($response);
-				$data = array('nom' => $user->getNom(), 'prenom' => $user->getPrenom());
-				$response->getBody()->write(json_encode($data));
-			} else {          
-				error_log("Utilisateur non trouvé");
-				$response = $response->withStatus(403);
-				$response->getBody()->write(json_encode(['error' => 'Identifiants invalides']));
+			error_log("Début postLogin");
+
+			$body = $request->getParsedBody();
+			error_log("Body reçu : " . json_encode($body));
+
+			if ($body === null) {
+				$body = json_decode($request->getBody()->getContents(), true);
+				error_log("Body après json_decode : " . json_encode($body));
+			}
+			$login = $body['login'] ?? "";
+			$password = $body['password'] ?? "";
+
+			error_log("Login: " . $login . ", Password: " . $password);
+
+			if (!$entityManager) {
+				throw new Exception("EntityManager non initialisé");
+			}
+
+			try {
+				$userRepository = $entityManager->getRepository('Entity\Utilisateurs');
+				error_log("Repository obtenu");
+
+				$user = $userRepository->findOneBy(['login' => $login, 'password' => $password]);
+				error_log("Recherche utilisateur effectuée");
+
+				if ($user) {
+					error_log("Utilisateur trouvé");
+
+					// Création du JWT
+					$response = addHeaders($response);
+					$response = createJwt($response); 
+
+					// Prépare les données à renvoyer
+					$userData = [
+						'login' => $user->getLogin(),
+						'nom' => $user->getNom(),
+						'prenom' => $user->getPrenom()
+					];
+					$data = array(
+						'token' => str_replace("Bearer ", "", $response->getHeader('Authorization')[0]),
+						'user' => $userData
+					);
+
+					$response->getBody()->write(json_encode($data));
+				} else {
+					error_log("Utilisateur non trouvé");
+					$response = $response->withStatus(403);
+					$response->getBody()->write(json_encode(['error' => 'Identifiants invalides']));
+				}
+			} catch (Exception $e) {
+				error_log("Erreur Doctrine : " . $e->getMessage());
+				throw $e;
 			}
 		} catch (Exception $e) {
-			error_log("Erreur Doctrine : " . $e->getMessage());
-			throw $e;
+			error_log("Erreur finale : " . $e->getMessage());
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode([
+				'error' => 'Erreur serveur',
+				'message' => $e->getMessage(),
+				'trace' => $e->getTraceAsString()
+			]));
 		}
-		
-	    } catch (Exception $e) {
-		error_log("Erreur finale : " . $e->getMessage());
-		$response = $response->withStatus(500);
-		$response->getBody()->write(json_encode([
-			'error' => 'Erreur serveur',
-			'message' => $e->getMessage(),
-			'trace' => $e->getTraceAsString()
-		]));
-	    }
-
-	    return addHeaders($response);
+		return addHeaders($response);
 	}
 
 	$app->options('/api/utilisateur/login', function (Request $request, Response $response, $args) {
-		return addHeaders($response); 
+		return addHeaders($response);
 	});
