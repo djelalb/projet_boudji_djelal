@@ -25,8 +25,13 @@ export class AccountComponent implements OnInit {
       if (!isAuth) {
         this.router.navigate(['/login']);
       } else {
-        this.user = this.authService.getCurrentUser();
-        this.editableUser = { ...this.user };
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser && currentUser.id) {
+          this.user = currentUser;
+          this.editableUser = { ...this.user };
+        } else {
+          console.error('Utilisateur invalide ou ID manquant');
+        }
       }
     });
   }
@@ -51,8 +56,9 @@ export class AccountComponent implements OnInit {
 
   onUpdatePersonalInfo() {
     this.authService.updateUser(this.editableUser).subscribe(
-      (updatedUser) => {
-        this.user = updatedUser;
+      () => {
+        this.user = { ...this.user, ...this.editableUser };
+        localStorage.setItem('currentUser', JSON.stringify(this.user));
         this.isEditingPersonalInfo = false;
       },
       (error) => {
@@ -60,6 +66,8 @@ export class AccountComponent implements OnInit {
       }
     );
   }
+
+
 
   addCreditCard() {
     this.router.navigate(['/add-credit-card']);
@@ -71,10 +79,19 @@ export class AccountComponent implements OnInit {
 
   confirmDeleteAccount() {
     if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ?')) {
-      this.authService.deleteAccount().subscribe(() => {
-        this.logout();
-        this.router.navigate(['/login']);
-      });
+      if (this.user && this.user.id) {
+        this.authService.deleteAccount(this.user.id).subscribe(
+          () => {
+            this.logout();
+            this.router.navigate(['/login']);
+          },
+          (error) => {
+            console.error('Erreur lors de la suppression du compte :', error);
+          }
+        );
+      } else {
+        console.error('L’objet utilisateur est invalide ou ne contient pas de champ id.');
+      }
     }
   }
 }

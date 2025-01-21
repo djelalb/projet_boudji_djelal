@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule  } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
@@ -13,7 +13,15 @@ import { RouterModule  } from '@angular/router';
   styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent {
-  newUser = { firstName: '', lastName: '', login: '', password: '' };
+  newUser = {
+    prenom: '',
+    nom: '',
+    login: '',
+    password: '',
+    email: '',
+    adresse: '',
+    telephone: '',
+  };
   error: string | null = null;
 
   constructor(private authService: AuthService, private router: Router) {}

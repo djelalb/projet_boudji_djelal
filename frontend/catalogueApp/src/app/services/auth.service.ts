@@ -11,7 +11,7 @@ export class AuthService {
   private accessToken: string = '';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-  private currentUser: { login: string } | null = null;
+  private currentUser: { id: number; login: string } | null = null;
 
   constructor(private http: HttpClient) {
     // Vérifier si un token est présent lors du démarrage et mettre à jour l'état d'authentification
@@ -44,7 +44,7 @@ export class AuthService {
     return this.accessToken || localStorage.getItem('jwtToken') || '';
   }
 
-  signup(user: { login: string; password: string }): Observable<any> {
+  signup(user: { login: string; password: string; nom: string; prenom: string; email: string; adresse?: string; telephone?: string }): Observable<any> {
     return this.http.post(`${environment.apiUrl}/utilisateur/signup`, user);
   }
 
@@ -56,25 +56,16 @@ export class AuthService {
     this.isAuthenticatedSubject.next(false);
   }
 
-  /**
-   * Vérifie si l'utilisateur est authentifié
-   */
   isAuthenticated(): Observable<boolean> {
     return this.isAuthenticated$;
   }
 
-  /**
-   * Définir l'utilisateur actuel après connexion
-   */
-  private setCurrentUser(user: { login: string }): void {
+  private setCurrentUser(user: { id: number; login: string }): void {
     this.currentUser = user;
     localStorage.setItem('currentUser', JSON.stringify(user));
   }
 
-  /**
-   * Récupérer l'utilisateur actuellement connecté
-   */
-  getCurrentUser(): { login: string } | null {
+  getCurrentUser(): { id: number; login: string } | null {
     if (!this.currentUser) {
       const storedUser = localStorage.getItem('currentUser');
       this.currentUser = storedUser ? JSON.parse(storedUser) : null;
@@ -82,11 +73,31 @@ export class AuthService {
     return this.currentUser;
   }
 
-  updateUser(user: any) {
-    return this.http.put(`/api/users/${user.id}`, user);
+  updateUser(user: { id: number; nom?: string; prenom?: string; email?: string; adresse?: string; telephone?: string }): Observable<any> {
+    const token = localStorage.getItem('jwtToken') || '';
+    const headers: { [header: string]: string } = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return this.http.put(`${environment.apiUrl}/utilisateur/${user.id}`, user, { headers }).pipe(
+      tap((updatedUser: any) => {
+        if (this.currentUser && updatedUser) {
+          // Mettez à jour les informations utilisateur dans le localStorage
+          this.currentUser = { ...this.currentUser, ...updatedUser };
+          localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+        }
+      })
+    );
   }
 
-  deleteAccount() {
-    return this.http.delete('/api/users/me');
+  deleteAccount(userId: number): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/utilisateur/${userId}`).pipe(
+      tap(() => {
+        this.logout();
+      })
+    );
   }
 }
