@@ -20,4 +20,15 @@ Entity\Utilisateurs:
     password:
       type: string
       length: 50
-      nullable: true 
+      nullable: true
+    adresse:
+      type: string
+      length: 50
+      nullable: true
+    email:
+      type: string
+      length: 50
+      nullable: true
+    telephone:
+      type: string
+      nullable: true

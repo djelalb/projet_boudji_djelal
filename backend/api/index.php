@@ -4,7 +4,7 @@
 
 	require __DIR__ . '/../vendor/autoload.php';
 	require_once __DIR__ . '/../bootstrap.php';
-	
+
 	$app = AppFactory::create();
 
 	require_once __DIR__ . '/middleware.php';

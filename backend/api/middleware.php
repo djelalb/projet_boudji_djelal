@@ -18,7 +18,7 @@ function getJWTToken($request) {
 function createJwt(Response $response): Response {
     $userid = "djelal";
     $issuedAt = time();
-    $expirationTime = $issuedAt + 600; // JWT valide pendant 10 minutes
+    $expirationTime = $issuedAt + 1200; // JWT valide pendant 20 minutes
     $payload = [
         'userid' => $userid,
         'iat' => $issuedAt,
@@ -64,3 +64,5 @@ function addHeaders(Response $response): Response {
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
         ->withHeader('Access-Control-Expose-Headers', 'Authorization');
 }
+
+$app->addBodyParsingMiddleware();

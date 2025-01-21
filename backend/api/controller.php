@@ -105,7 +105,15 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	    $userRepository = $entityManager->getRepository('user');
 	    $user = $userRepository->findOneBy(array('login' => $login));
 	    if ($user) {
-			$data = array('login' => $user->getLogin(), 'nom' => $user->getNom(), 'prenom' => $user->getPrenom());
+			$data = array(
+				'id' => $user->getId(),
+				'login' => $user->getLogin(),
+				'nom' => $user->getNom(),
+				'prenom' => $user->getPrenom(),
+				'email' => $user->getEmail(),
+				'adresse' => $user->getAdresse(),
+				'telephone' => $user->getTelephone()
+			);
 			$response = addHeaders ($response);
 			$response = createJwT ($response);
 			$response->getBody()->write(json_encode($data));
@@ -153,11 +161,15 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 					$response = createJwt($response); 
 
 					// Prépare les données à renvoyer
-					$userData = [
+					$userData = array(
+						'id' => $user->getId(),
 						'login' => $user->getLogin(),
 						'nom' => $user->getNom(),
-						'prenom' => $user->getPrenom()
-					];
+						'prenom' => $user->getPrenom(),
+						'email' => $user->getEmail(),
+						'adresse' => $user->getAdresse(),
+						'telephone' => $user->getTelephone()
+					);
 					$data = array(
 						'token' => str_replace("Bearer ", "", $response->getHeader('Authorization')[0]),
 						'user' => $userData
@@ -185,6 +197,87 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		return addHeaders($response);
 	}
 
-	$app->options('/api/utilisateur/login', function (Request $request, Response $response, $args) {
-		return addHeaders($response);
-	});
+	function createUtilisateur(Request $request, Response $response, $args) {
+		global $entityManager;
+		try {
+			$data = $request->getParsedBody();
+			$utilisateur = new \Entity\Utilisateurs();
+			$utilisateur->setNom($data['nom']);
+			$utilisateur->setPrenom($data['prenom']);
+			$utilisateur->setLogin($data['login']);
+			$utilisateur->setPassword($data['password']);
+			$utilisateur->setEmail($data['email']);
+			$utilisateur->setAdresse($data['adresse']);
+			$utilisateur->setTelephone($data['telephone']);
+	
+			$entityManager->persist($utilisateur);
+			$entityManager->flush();
+	
+			$response->getBody()->write(json_encode(['message' => 'Utilisateur créé avec succès']));
+			return addHeaders($response);
+		} catch (\Exception $e) {
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+			return addHeaders($response);
+		}
+	}
+
+	function updateUtilisateur(Request $request, Response $response, $args) {
+		global $entityManager;
+		try {
+			$id = $args['id'];
+			$data = $request->getParsedBody();
+			$utilisateur = $entityManager->find('Entity\Utilisateurs', $id);
+			if (!$utilisateur) {
+				$response = $response->withStatus(404);
+				$response->getBody()->write(json_encode(['message' => 'Utilisateur non trouvé']));
+				return addHeaders($response);
+			}
+
+			// Mettre à jour les propriétés de l'utilisateur uniquement si elles existent dans les données envoyées
+			$utilisateur->setNom($data['nom'] ?? $utilisateur->getNom());
+			$utilisateur->setPrenom($data['prenom'] ?? $utilisateur->getPrenom());
+			$utilisateur->setLogin($data['login'] ?? $utilisateur->getLogin());
+			$utilisateur->setPassword($data['password'] ?? $utilisateur->getPassword());
+			$utilisateur->setEmail($data['email'] ?? $utilisateur->getEmail());
+			$utilisateur->setAdresse($data['adresse'] ?? $utilisateur->getAdresse());
+			$utilisateur->setTelephone($data['telephone'] ?? $utilisateur->getTelephone());
+
+			$entityManager->flush();
+
+			$response->getBody()->write(json_encode(['message' => 'Utilisateur mis à jour avec succès']));
+			return addHeaders($response);
+
+		} catch (\Exception $e) {
+			error_log("Erreur lors de la mise à jour : " . $e->getMessage());
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+			return addHeaders($response);
+		}
+	}
+	
+
+	function deleteUtilisateur(Request $request, Response $response, $args) {
+		global $entityManager;
+		try {
+			$id = $args['id'];
+	
+			$utilisateur = $entityManager->find('Entity\Utilisateurs', $id);
+			if (!$utilisateur) {
+				$response = $response->withStatus(404);
+				$response->getBody()->write(json_encode(['message' => 'Utilisateur non trouvé']));
+				return addHeaders($response);
+			}
+	
+			$entityManager->remove($utilisateur);
+			$entityManager->flush();
+	
+			$response->getBody()->write(json_encode(['message' => 'Utilisateur supprimé avec succès']));
+			return addHeaders($response);
+		} catch (\Exception $e) {
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+			return addHeaders($response);
+		}
+	}
+	
