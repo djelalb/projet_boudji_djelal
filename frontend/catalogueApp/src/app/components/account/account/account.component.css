@@ -218,3 +218,15 @@ h2, h3, p, div, i {
   background-color: #e76f51;
   color: #fff;
 }
+
+.error-message {
+  color: #e63946;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+input.invalid {
+  border-color: #e63946;
+  background-color: #1e1e2f;
+}

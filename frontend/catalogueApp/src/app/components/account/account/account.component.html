@@ -25,13 +25,29 @@
         <input id="prenom" [(ngModel)]="editableUser.prenom" name="prenom" required />
 
         <label for="email">Email :</label>
-        <input id="email" [(ngModel)]="editableUser.email" name="email" type="email" required />
+        <input
+          id="email"
+          [(ngModel)]="editableUser.email"
+          name="email"
+          type="email"
+          required
+          [class.invalid]="!isEmailValid"
+        />
+        <p *ngIf="!isEmailValid" class="error-message">Adresse email invalide.</p>
 
         <label for="adresse">Adresse :</label>
         <input id="adresse" [(ngModel)]="editableUser.adresse" name="adresse" />
 
         <label for="telephone">Téléphone :</label>
-        <input id="telephone" [(ngModel)]="editableUser.telephone" name="telephone" type="text" />
+        <input
+          id="telephone"
+          [(ngModel)]="editableUser.telephone"
+          name="telephone"
+          type="text"
+          required
+          [class.invalid]="!isPhoneValid"
+        />
+        <p *ngIf="!isPhoneValid" class="error-message">Numéro de téléphone invalide (10-15 chiffres, optionnellement avec un "+").</p>
 
         <div class="form-actions">
           <button type="submit">Sauvegarder</button>

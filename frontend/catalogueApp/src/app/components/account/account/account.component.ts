@@ -17,6 +17,8 @@ export class AccountComponent implements OnInit {
   editableUser: any = {};
   currentSection: string = 'personalInfo';
   isEditingPersonalInfo: boolean = false;
+  isEmailValid: boolean = true;
+  isPhoneValid: boolean = true;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -55,11 +57,19 @@ export class AccountComponent implements OnInit {
   }
 
   onUpdatePersonalInfo() {
+    this.isEmailValid = this.validateEmail(this.editableUser.email);
+    this.isPhoneValid = this.validatePhone(this.editableUser.telephone);
+
+    if (!this.isEmailValid || !this.isPhoneValid) {
+      return;
+    }
+
     this.authService.updateUser(this.editableUser).subscribe(
       () => {
         this.user = { ...this.user, ...this.editableUser };
         localStorage.setItem('currentUser', JSON.stringify(this.user));
         this.isEditingPersonalInfo = false;
+        alert("Informations mises à jour !");
       },
       (error) => {
         console.error("Erreur lors de la mise à jour des informations :", error);
@@ -93,5 +103,13 @@ export class AccountComponent implements OnInit {
         console.error('L’objet utilisateur est invalide ou ne contient pas de champ id.');
       }
     }
+  }
+
+  validateEmail(email: string): boolean {
+    return /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/.test(email);
+  }
+
+  validatePhone(phone: string): boolean {
+    return /^[0-9]{10}$/.test(phone);
   }
 }
