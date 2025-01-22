@@ -67,51 +67,14 @@
 
     <!-- Section Cartes de crédit -->
     <div *ngIf="currentSection === 'creditCards'">
-      <h3>Cartes de crédit enregistrées</h3>
-
-      <div *ngIf="creditCards.length === 0">
-        <p>Pas encore de carte enregistrée.</p>
-      </div>
-
-      <div *ngIf="creditCards.length > 0">
-        <ul>
-          <li *ngFor="let card of creditCards">
-            <p><strong>Carte :</strong> **** **** **** {{ card.numero_carte.substring(card.numero_carte.length - 4) }}</p>
-            <p><strong>Expiration :</strong> {{ card.expiration_date }}</p>
-            <button (click)="deleteCreditCard(card.id)">Supprimer</button>
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <h4>Ajouter une nouvelle carte</h4>
-        <form (ngSubmit)="addCreditCard()">
-          <label for="numero_carte">Numéro de carte :</label>
-          <input id="numero_carte" [(ngModel)]="newCard.numero_carte" name="numero_carte" maxlength="16" required />
-
-          <label for="expiration_date">Date d'expiration :</label>
-          <input id="expiration_date" [(ngModel)]="newCard.expiration_date" name="expiration_date" type="month" required />
-
-          <label for="titulaire">Titulaire :</label>
-          <input id="titulaire" [(ngModel)]="newCard.titulaire" name="titulaire" maxlength="255" required />
-
-          <label for="cryptogramme">Cryptogramme :</label>
-          <input
-            id="cryptogramme"
-            [(ngModel)]="newCard.cryptogramme"
-            name="cryptogramme"
-            type="text"
-            pattern="[0-9]{3}"
-            maxlength="3"
-            required
-          />
-          <p *ngIf="newCard.cryptogramme.length > 3" class="error-message">
-            Le cryptogramme doit comporter exactement 3 chiffres.
-          </p>
-
-          <button type="submit">Ajouter la carte</button>
-        </form>
-      </div>
+      <app-credit-card
+        [creditCards]="creditCards"
+        (deleteCard)="deleteCreditCard($event)"
+      ></app-credit-card>
+      <app-add-credit-card
+        [userId]="user?.id"
+        (cardAdded)="handleCardAdded($event)"
+      ></app-add-credit-card>
     </div>
 
     <!-- Section Commandes -->

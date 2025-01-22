@@ -1,0 +1,20 @@
+<div class="credit-card-container">
+  <h3>Cartes de crédit enregistrées</h3>
+
+  <div *ngIf="creditCards.length === 0" class="no-cards">
+    <p>Aucune carte enregistrée.</p>
+  </div>
+
+  <div *ngIf="creditCards.length > 0" class="credit-card-list">
+    <div *ngFor="let card of creditCards" class="credit-card-item">
+      <p><strong>Carte :</strong> {{ card.numero_carte | maskCardNumber }}</p>
+      <p><strong>Expiration :</strong> {{ card.expiration_date }}</p>
+      <p><strong>Titulaire :</strong> {{ card.titulaire }}</p>
+      <p><strong>Cryptogramme :</strong> {{ card.cryptogramme }}</p>
+
+      <div class="credit-card-actions">
+        <button (click)="handleDelete(card.id)">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../environnement/environnement';
@@ -44,6 +44,15 @@ export class AuthService {
     return this.accessToken || localStorage.getItem('jwtToken') || '';
   }
 
+  // Récupération du token JWT depuis le localStorage
+    private getAuthHeaders(): HttpHeaders {
+      const token = localStorage.getItem('jwtToken') || '';
+      return new HttpHeaders({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      });
+    }
+
   signup(user: { login: string; password: string; nom: string; prenom: string; email: string; adresse?: string; telephone?: string }): Observable<any> {
     return this.http.post(`${environment.apiUrl}/utilisateur/signup`, user);
   }
@@ -74,14 +83,7 @@ export class AuthService {
   }
 
   updateUser(user: { id: number; nom?: string; prenom?: string; email?: string; adresse?: string; telephone?: string }): Observable<any> {
-    const token = localStorage.getItem('jwtToken') || '';
-    const headers: { [header: string]: string } = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
+    const headers = this.getAuthHeaders();
     return this.http.put(`${environment.apiUrl}/utilisateur/${user.id}`, user, { headers }).pipe(
       tap((updatedUser: any) => {
         if (this.currentUser && updatedUser) {
@@ -94,7 +96,9 @@ export class AuthService {
   }
 
   deleteAccount(userId: number): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/utilisateur/${userId}`).pipe(
+    console.log('Suppression du compte utilisateur', userId);
+    const headers = this.getAuthHeaders();
+    return this.http.delete(`${environment.apiUrl}/utilisateur/${userId}`, { headers }).pipe(
       tap(() => {
         this.logout();
       })

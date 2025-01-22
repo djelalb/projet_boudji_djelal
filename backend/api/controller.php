@@ -3,10 +3,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 	function optionsCatalogue (Request $request, Response $response, $args) {
-	    
 	    // Evite que le front demande une confirmation à chaque modification
 	    $response = $response->withHeader("Access-Control-Max-Age", 600);
-	    
 	    return addHeaders ($response);
 	}
 
@@ -25,20 +23,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		} else {
 			return [];
 		}
-	}	
-	
+	}
+
 	function getSearchCatalogue(Request $request, Response $response, $args) {
 		global $entityManager;
 		try {
 			$filter = $args['filtre'] ?? '';
 			$produitsRepository = $entityManager->getRepository(\Entity\Produits::class);
-			
 			$qb = $produitsRepository->createQueryBuilder('p');
 			$qb->where('LOWER(p.name) LIKE LOWER(:filter)')
 			   ->setParameter('filter', '%' . $filter . '%');
-			
 			$produits = $qb->getQuery()->getResult();
-			
 			$data = array_map(function($produit) {
 				return [
 					'id' => $produit->getId(),
@@ -48,14 +43,13 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 					'image' => $produit->getImage()
 				];
 			}, $produits);
-			
 			$response->getBody()->write(json_encode($data));
 		} catch (\Exception $e) {
 			$response = $response->withStatus(500);
 			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
 		}
 		return addHeaders($response);
-	}	
+	}
 
 	// API Nécessitant un Jwt valide
 	function getCatalogue(Request $request, Response $response, $args) {
@@ -63,7 +57,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		try {
 			$produitsRepository = $entityManager->getRepository(\Entity\Produits::class);
 			$produits = $produitsRepository->findAll();
-			
 			if (!empty($produits)) {
 				$data = array_map(function($produit) {
 					return [
@@ -74,7 +67,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 						'image' => $produit->getImage()
 					];
 				}, $produits);
-				
 				$response->getBody()->write(json_encode($data));
 			} else {
 				$response = $response->withStatus(404);
@@ -85,23 +77,20 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
 		}
 		return addHeaders($response);
-	}	
+	}
 
 	function optionsUtilisateur (Request $request, Response $response, $args) {
-	    
 	    // Evite que le front demande une confirmation à chaque modification
 	    $response = $response->withHeader("Access-Control-Max-Age", 600);
-	    
 	    return addHeaders ($response);
 	}
 
 	// API Nécessitant un Jwt valide
 	function getUtilisateur (Request $request, Response $response, $args) {
 	    global $entityManager;
-	    
+
 	    $payload = getJWTToken($request);
 	    $login  = $payload->userid;
-	    
 	    $userRepository = $entityManager->getRepository('user');
 	    $user = $userRepository->findOneBy(array('login' => $login));
 	    if ($user) {
@@ -209,10 +198,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			$utilisateur->setEmail($data['email']);
 			$utilisateur->setAdresse($data['adresse']);
 			$utilisateur->setTelephone($data['telephone']);
-	
 			$entityManager->persist($utilisateur);
 			$entityManager->flush();
-	
+
 			$response->getBody()->write(json_encode(['message' => 'Utilisateur créé avec succès']));
 			return addHeaders($response);
 		} catch (\Exception $e) {
@@ -255,23 +243,21 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			return addHeaders($response);
 		}
 	}
-	
 
 	function deleteUtilisateur(Request $request, Response $response, $args) {
 		global $entityManager;
 		try {
 			$id = $args['id'];
-	
 			$utilisateur = $entityManager->find('Entity\Utilisateurs', $id);
 			if (!$utilisateur) {
 				$response = $response->withStatus(404);
 				$response->getBody()->write(json_encode(['message' => 'Utilisateur non trouvé']));
 				return addHeaders($response);
 			}
-	
+
 			$entityManager->remove($utilisateur);
 			$entityManager->flush();
-	
+
 			$response->getBody()->write(json_encode(['message' => 'Utilisateur supprimé avec succès']));
 			return addHeaders($response);
 		} catch (\Exception $e) {
@@ -280,51 +266,56 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			return addHeaders($response);
 		}
 	}
-	
+
 	function createCarte(Request $request, Response $response, $args) {
 		global $entityManager;
 		try {
 			$data = $request->getParsedBody();
-	
+			$utilisateur = $entityManager->getRepository('Entity\Utilisateurs')->find($data['utilisateur_id']);
+			if (!$utilisateur) {
+				throw new \Exception("Utilisateur non trouvé");
+			}
+
 			$carte = new \Entity\CartesCredit();
-			$carte->setUtilisateurId($data['utilisateur_id']);
+			$carte->setUtilisateur($utilisateur);
 			$carte->setNumeroCarte($data['numero_carte']);
 			$carte->setExpirationDate(new \DateTime($data['expiration_date']));
 			$carte->setTitulaire($data['titulaire']);
 			$carte->setCryptogramme($data['cryptogramme']);
-	
+
 			$entityManager->persist($carte);
 			$entityManager->flush();
-	
+
 			$response->getBody()->write(json_encode(['message' => 'Carte créée avec succès']));
 			return addHeaders($response);
 		} catch (\Exception $e) {
+			error_log("Erreur lors de la création de la carte : " . $e->getMessage());
 			$response = $response->withStatus(500);
 			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
 			return addHeaders($response);
 		}
 	}
-	
+
 	function updateCarte(Request $request, Response $response, $args) {
 		global $entityManager;
 		try {
 			$id = $args['id'];
 			$data = $request->getParsedBody();
-	
+
 			$carte = $entityManager->find('Entity\CartesCredit', $id);
 			if (!$carte) {
 				$response = $response->withStatus(404);
 				$response->getBody()->write(json_encode(['message' => 'Carte non trouvée']));
 				return addHeaders($response);
 			}
-	
+
 			$carte->setNumeroCarte($data['numero_carte'] ?? $carte->getNumeroCarte());
 			$carte->setExpirationDate(new \DateTime($data['expiration_date'] ?? $carte->getExpirationDate()->format('Y-m-d')));
 			$carte->setTitulaire($data['titulaire'] ?? $carte->getTitulaire());
 			$carte->setCryptogramme($data['cryptogramme'] ?? $carte->getCryptogramme());
-	
+
 			$entityManager->flush();
-	
+
 			$response->getBody()->write(json_encode(['message' => 'Carte mise à jour avec succès']));
 			return addHeaders($response);
 		} catch (\Exception $e) {
@@ -333,22 +324,22 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			return addHeaders($response);
 		}
 	}
-	
+
 	function deleteCarte(Request $request, Response $response, $args) {
 		global $entityManager;
 		try {
 			$id = $args['id'];
-	
+
 			$carte = $entityManager->find('Entity\CartesCredit', $id);
 			if (!$carte) {
 				$response = $response->withStatus(404);
 				$response->getBody()->write(json_encode(['message' => 'Carte non trouvée']));
 				return addHeaders($response);
 			}
-	
+
 			$entityManager->remove($carte);
 			$entityManager->flush();
-	
+
 			$response->getBody()->write(json_encode(['message' => 'Carte supprimée avec succès']));
 			return addHeaders($response);
 		} catch (\Exception $e) {
@@ -357,22 +348,24 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			return addHeaders($response);
 		}
 	}
-	
+
 	function getCartesByUtilisateur(Request $request, Response $response, $args) {
 		global $entityManager;
 		try {
 			$queryParams = $request->getQueryParams();
 			$utilisateurId = $queryParams['utilisateur_id'] ?? null;
-	
+
 			if (!$utilisateurId) {
 				$response = $response->withStatus(400);
 				$response->getBody()->write(json_encode(['error' => 'Utilisateur ID manquant']));
 				return addHeaders($response);
 			}
-	
+
 			$cartesRepository = $entityManager->getRepository('Entity\CartesCredit');
 			$cartes = $cartesRepository->findBy(['utilisateur_id' => $utilisateurId]);
-	
+
+			error_log("Cartes trouvées : " . json_encode($cartes));
+
 			$data = array_map(function($carte) {
 				return [
 					'id' => $carte->getId(),
@@ -383,7 +376,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 					'cryptogramme' => $carte->getCryptogramme(),
 				];
 			}, $cartes);
-	
+
 			$response->getBody()->write(json_encode($data));
 			return addHeaders($response);
 		} catch (\Exception $e) {

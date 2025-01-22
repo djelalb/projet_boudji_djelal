@@ -1,0 +1,73 @@
+.add-credit-card-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  background-color: #2b2b3a;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.add-credit-card-container h4 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #e9c46a;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+.add-credit-card-container form {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 15px 20px;
+  align-items: center;
+}
+
+.add-credit-card-container form label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #e9c46a;
+  text-align: right;
+}
+
+.add-credit-card-container form input {
+  padding: 10px 15px;
+  font-size: 14px;
+  color: #f0f0f5;
+  background-color: #1e1e2f;
+  border: 1px solid #333;
+  border-radius: 5px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.add-credit-card-container form input:focus {
+  border-color: #e76f51;
+  background-color: #1e1e2f;
+  outline: none;
+}
+
+.add-credit-card-container form .error-message {
+  grid-column: span 2;
+  font-size: 12px;
+  color: #e63946;
+}
+
+.add-credit-card-container form button {
+  grid-column: span 2;
+  margin-top: 10px;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #e76f51;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.add-credit-card-container form button:hover {
+  background-color: #e63946;
+  transform: translateY(-2px);
+}

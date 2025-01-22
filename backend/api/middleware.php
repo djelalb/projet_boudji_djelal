@@ -18,7 +18,7 @@ function getJWTToken($request) {
 function createJwt(Response $response): Response {
     $userid = "djelal";
     $issuedAt = time();
-    $expirationTime = $issuedAt + 1200; // JWT valide pendant 20 minutes
+    $expirationTime = $issuedAt + 1800; // JWT valide pendant 30 minutes
     $payload = [
         'userid' => $userid,
         'iat' => $issuedAt,

@@ -22,11 +22,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	$app->put('/api/utilisateur/{id}', 'updateUtilisateur');
 	$app->delete('/api/utilisateur/{id}', 'deleteUtilisateur');
 
-	$app->options('/api/utilisateur', 'optionsUtilisateur');
-	$app->options('/api/utilisateur/login', function (Request $request, Response $response, $args) {
-		return addHeaders($response);
-	});
-	$app->options('/api/utilisateur/{id}', function (Request $request, Response $response, $args) {
+	$app->options('/api/{routes:.+}', function (Request $request, Response $response) {
 		return addHeaders($response);
 	});
 

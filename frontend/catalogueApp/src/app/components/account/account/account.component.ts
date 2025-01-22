@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import { ApiService } from '../../../services/api.service'; // Importer ApiService
+import { ApiService } from '../../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CreditCardComponent } from '../../credit-card/credit-card.component';
+import { AddCreditCardComponent } from '../../../add-credit-card/add-credit-card.component';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CreditCardComponent, AddCreditCardComponent],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
 })
@@ -98,52 +100,6 @@ export class AccountComponent implements OnInit {
     );
   }
 
-  addCreditCard() {
-    if (!this.validateCardData(this.newCard)) {
-      alert('Les données de la carte sont invalides.');
-      return;
-    }
-
-    this.apiService.createCarteCredit(this.newCard).subscribe(
-      (response) => {
-        this.creditCards.push(response);
-        this.newCard = { utilisateur_id: this.user.id, numero_carte: '', expiration_date: '', titulaire: '', cryptogramme: '' };
-        alert('Carte de crédit ajoutée avec succès!');
-      },
-      (error) => {
-        console.error("Erreur lors de l'ajout de la carte de crédit", error);
-      }
-    );
-  }
-
-  validateCardData(card: any): boolean {
-    if (!/^\d{13,16}$/.test(card.numero_carte)) {
-      console.error("Numéro de carte invalide.");
-      return false;
-    }
-    if (!/^\d{3}$/.test(card.cryptogramme)) {
-      console.error("Cryptogramme invalide.");
-      return false;
-    }
-    if (card.titulaire.trim().length === 0) {
-      console.error("Le nom du titulaire est requis.");
-      return false;
-    }
-    return true;
-  }
-
-  deleteCreditCard(cardId: number) {
-    this.apiService.deleteCarteCredit(cardId).subscribe(
-      () => {
-        this.creditCards = this.creditCards.filter(card => card.id !== cardId);  // Supprimer la carte de la liste
-        alert('Carte supprimée avec succès!');
-      },
-      (error) => {
-        console.error('Erreur lors de la suppression de la carte de crédit', error);
-      }
-    );
-  }
-
   viewOrderHistory() {
     this.router.navigate(['/order-history']);
   }
@@ -151,6 +107,7 @@ export class AccountComponent implements OnInit {
   confirmDeleteAccount() {
     if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ?')) {
       if (this.user && this.user.id) {
+        console.log('Suppression du compte utilisateur', this.user.id);
         this.authService.deleteAccount(this.user.id).subscribe(
           () => {
             this.logout();
@@ -172,5 +129,34 @@ export class AccountComponent implements OnInit {
 
   validatePhone(phone: string): boolean {
     return /^[0-9]{10}$/.test(phone);
+  }
+
+  deleteCreditCard(cardId: number) {
+    this.apiService.deleteCarteCredit(cardId).subscribe(
+      () => {
+        this.creditCards = this.creditCards.filter(card => card.id !== cardId);
+        alert('Carte supprimée avec succès!');
+      },
+      (error) => {
+        console.error('Erreur lors de la suppression de la carte de crédit', error);
+      }
+    );
+  }
+
+  handleCardAdded(newCard: any) {
+    this.apiService.createCarteCredit(newCard).subscribe(
+      (response) => {
+        const addedCard = {
+          ...newCard,
+          ...response
+        };
+
+        this.creditCards.push(addedCard);
+        alert('Carte de crédit ajoutée avec succès!');
+      },
+      (error) => {
+        console.error('Erreur lors de l\'ajout de la carte de crédit', error);
+      }
+    );
   }
 }

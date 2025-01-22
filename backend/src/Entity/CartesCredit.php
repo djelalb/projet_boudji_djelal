@@ -1,6 +1,8 @@
 <?php
 namespace Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @Entity
  * @Table(name="CartesCredit")
@@ -30,7 +32,7 @@ class CartesCredit
     private $expiration_date;
 
     /**
-     * @Column(type="text")
+     * @Column(type="string", length=255)
      */
     private $titulaire;
 
@@ -39,7 +41,14 @@ class CartesCredit
      */
     private $cryptogramme;
 
+    /**
+     * @ManyToOne(targetEntity="Entity\Utilisateurs", inversedBy="cartes")
+     * @JoinColumn(name="utilisateur_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $utilisateur;
+
     // Getters et Setters
+
     public function getId() { return $this->id; }
     public function getUtilisateurId() { return $this->utilisateur_id; }
     public function getNumeroCarte() { return $this->numero_carte; }
@@ -52,4 +61,7 @@ class CartesCredit
     public function setExpirationDate($expiration_date) { $this->expiration_date = $expiration_date; }
     public function setTitulaire($titulaire) { $this->titulaire = $titulaire; }
     public function setCryptogramme($cryptogramme) { $this->cryptogramme = $cryptogramme; }
+
+    public function getUtilisateur() { return $this->utilisateur; }
+    public function setUtilisateur($utilisateur) { $this->utilisateur = $utilisateur; }
 }
