@@ -9,7 +9,7 @@ import { CarteCredit } from '../models/cartescredit';
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = environmentprod.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -52,7 +52,6 @@ export class ApiService {
 
   updateCarteCredit(id: number, carte: Partial<CarteCredit>, userId: number): Observable<CarteCredit> {
     const body = { ...carte, utilisateur_id: userId };
-    console.log(body);
     return this.http.put<CarteCredit>(`${this.apiUrl}/cartes/${id}`, body, {
       headers: this.getAuthHeaders(),
     });
