@@ -298,32 +298,58 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 	function updateCarte(Request $request, Response $response, $args) {
 		global $entityManager;
+	
 		try {
+			// Récupération de l'ID de la carte depuis les paramètres de route
 			$id = $args['id'];
+	
+			// Extraction des données du corps de la requête
 			$data = $request->getParsedBody();
-
+	
+			// Vérification de l'utilisateur dans les paramètres de requête
+			$userId = $data['utilisateur_id'] ?? null;
+			if (!$userId) {
+				$response = $response->withStatus(400);
+				$response->getBody()->write(json_encode(['error' => 'Utilisateur ID manquant']));
+				return addHeaders($response);
+			}
+	
+			// Récupération de la carte par son ID
 			$carte = $entityManager->find('Entity\CartesCredit', $id);
 			if (!$carte) {
 				$response = $response->withStatus(404);
 				$response->getBody()->write(json_encode(['message' => 'Carte non trouvée']));
 				return addHeaders($response);
 			}
-
+	
+			// Vérification que la carte appartient à l'utilisateur
+			if ($carte->getUtilisateur()->getId() !== (int)$userId) {
+				$response = $response->withStatus(403);
+				$response->getBody()->write(json_encode(['error' => 'Accès non autorisé à cette carte']));
+				return addHeaders($response);
+			}
+	
+			// Mise à jour des informations de la carte
 			$carte->setNumeroCarte($data['numero_carte'] ?? $carte->getNumeroCarte());
 			$carte->setExpirationDate(new \DateTime($data['expiration_date'] ?? $carte->getExpirationDate()->format('Y-m-d')));
 			$carte->setTitulaire($data['titulaire'] ?? $carte->getTitulaire());
 			$carte->setCryptogramme($data['cryptogramme'] ?? $carte->getCryptogramme());
-
+	
+			// Persistance des changements
 			$entityManager->flush();
-
+	
+			// Réponse de succès
 			$response->getBody()->write(json_encode(['message' => 'Carte mise à jour avec succès']));
 			return addHeaders($response);
+	
 		} catch (\Exception $e) {
+			// Gestion des erreurs
 			$response = $response->withStatus(500);
 			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
 			return addHeaders($response);
 		}
 	}
+	
 
 	function deleteCarte(Request $request, Response $response, $args) {
 		global $entityManager;
@@ -354,22 +380,36 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		try {
 			$queryParams = $request->getQueryParams();
 			$utilisateurId = $queryParams['utilisateur_id'] ?? null;
-
+	
 			if (!$utilisateurId) {
 				$response = $response->withStatus(400);
 				$response->getBody()->write(json_encode(['error' => 'Utilisateur ID manquant']));
 				return addHeaders($response);
 			}
-
+	
+			// Vérification de l'existence de l'utilisateur
+			$utilisateur = $entityManager->find('Entity\Utilisateur', $utilisateurId);
+			if (!$utilisateur) {
+				$response = $response->withStatus(404);
+				$response->getBody()->write(json_encode(['error' => 'Utilisateur non trouvé']));
+				return addHeaders($response);
+			}
+	
+			// Récupération des cartes de l'utilisateur
 			$cartesRepository = $entityManager->getRepository('Entity\CartesCredit');
-			$cartes = $cartesRepository->findBy(['utilisateur_id' => $utilisateurId]);
-
-			error_log("Cartes trouvées : " . json_encode($cartes));
-
+			$cartes = $cartesRepository->findBy(['utilisateur' => $utilisateur]);
+	
+			if (!$cartes) {
+				$response = $response->withStatus(404);
+				$response->getBody()->write(json_encode(['message' => 'Aucune carte trouvée pour cet utilisateur']));
+				return addHeaders($response);
+			}
+	
+			// Construction de la réponse
 			$data = array_map(function($carte) {
 				return [
 					'id' => $carte->getId(),
-					'utilisateur_id' => $carte->getUtilisateurId(),
+					'utilisateur_id' => $carte->getUtilisateur()->getId(),
 					'numero_carte' => $carte->getNumeroCarte(),
 					'expiration_date' => $carte->getExpirationDate()->format('Y-m-d'),
 					'titulaire' => $carte->getTitulaire(),
@@ -380,6 +420,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			$response->getBody()->write(json_encode($data));
 			return addHeaders($response);
 		} catch (\Exception $e) {
+			error_log('Erreur: ' . $e->getMessage());
 			$response = $response->withStatus(500);
 			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
 			return addHeaders($response);

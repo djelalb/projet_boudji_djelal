@@ -1,8 +1,8 @@
 {
-    "/api": {
-        "target": "https://10.223.115.133:3000",
-        "secure": true,
-        "changeOrigin": true,
-        "logLevel": "debug"
-    }
+  "/api/*": {
+  "target": "https://cnamappbuild.onrender.com/",
+  "secure": false,
+  "logLevel": "debug",
+  "changeOrigin": true
+  }
 }
