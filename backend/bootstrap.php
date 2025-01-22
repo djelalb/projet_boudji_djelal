@@ -1,19 +1,33 @@
 <?php
-	use Doctrine\ORM\Tools\Setup;
-	use Doctrine\ORM\EntityManager;
-	date_default_timezone_set('America/Lima');
-	require_once "vendor/autoload.php";
-	$isDevMode = true;
-	$config = Setup::createYAMLMetadataConfiguration(array(__DIR__ . "/config/yaml"), $isDevMode);
-	$conn = array(
-	'host' => 'dpg-cu0e9ehu0jms73d01jh0-a.oregon-postgres.render.com',
-	'driver' => 'pdo_pgsql',
-	'user' =>'cnam_postgree_djelal_user',
-	'password' => 'sJ5UIJbK4dyihQxB16SBgXwQKDdxhACT',
-	'dbname' => 'cnam_postgree_djelal',
-	'port' => '5432',
-	'sslmode' => 'allow'
-	);
+
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+use Dotenv\Dotenv;
+
+date_default_timezone_set('America/Lima');
+require_once "vendor/autoload.php";
+
+// Charge les variables d'environnement
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$isDevMode = true;
+$config = Setup::createYAMLMetadataConfiguration([__DIR__ . "/config/yaml"], $isDevMode);
+
+$conn = [
+    'host' => $_ENV['DB_HOST'],
+    'driver' => 'pdo_pgsql',
+    'user' => $_ENV['DB_USER'],
+    'password' => $_ENV['DB_PASSWORD'],
+    'dbname' => $_ENV['DB_NAME'],
+    'port' => $_ENV['DB_PORT'],
+    'sslmode' => $_ENV['SSL_MODE'],
+];
 
 
-	$entityManager = EntityManager::create($conn, $config);
+try {
+    $entityManager = EntityManager::create($conn, $config);
+} catch (\Exception $e) {
+    echo "Erreur lors de l'initialisation de l'EntityManager : " . $e->getMessage();
+    exit(1);
+}

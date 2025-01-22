@@ -281,3 +281,114 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		}
 	}
 	
+	function createCarte(Request $request, Response $response, $args) {
+		global $entityManager;
+		try {
+			$data = $request->getParsedBody();
+	
+			$carte = new \Entity\CartesCredit();
+			$carte->setUtilisateurId($data['utilisateur_id']);
+			$carte->setNumeroCarte($data['numero_carte']);
+			$carte->setExpirationDate(new \DateTime($data['expiration_date']));
+			$carte->setTitulaire($data['titulaire']);
+			$carte->setCryptogramme($data['cryptogramme']);
+	
+			$entityManager->persist($carte);
+			$entityManager->flush();
+	
+			$response->getBody()->write(json_encode(['message' => 'Carte créée avec succès']));
+			return addHeaders($response);
+		} catch (\Exception $e) {
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+			return addHeaders($response);
+		}
+	}
+	
+	function updateCarte(Request $request, Response $response, $args) {
+		global $entityManager;
+		try {
+			$id = $args['id'];
+			$data = $request->getParsedBody();
+	
+			$carte = $entityManager->find('Entity\CartesCredit', $id);
+			if (!$carte) {
+				$response = $response->withStatus(404);
+				$response->getBody()->write(json_encode(['message' => 'Carte non trouvée']));
+				return addHeaders($response);
+			}
+	
+			$carte->setNumeroCarte($data['numero_carte'] ?? $carte->getNumeroCarte());
+			$carte->setExpirationDate(new \DateTime($data['expiration_date'] ?? $carte->getExpirationDate()->format('Y-m-d')));
+			$carte->setTitulaire($data['titulaire'] ?? $carte->getTitulaire());
+			$carte->setCryptogramme($data['cryptogramme'] ?? $carte->getCryptogramme());
+	
+			$entityManager->flush();
+	
+			$response->getBody()->write(json_encode(['message' => 'Carte mise à jour avec succès']));
+			return addHeaders($response);
+		} catch (\Exception $e) {
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+			return addHeaders($response);
+		}
+	}
+	
+	function deleteCarte(Request $request, Response $response, $args) {
+		global $entityManager;
+		try {
+			$id = $args['id'];
+	
+			$carte = $entityManager->find('Entity\CartesCredit', $id);
+			if (!$carte) {
+				$response = $response->withStatus(404);
+				$response->getBody()->write(json_encode(['message' => 'Carte non trouvée']));
+				return addHeaders($response);
+			}
+	
+			$entityManager->remove($carte);
+			$entityManager->flush();
+	
+			$response->getBody()->write(json_encode(['message' => 'Carte supprimée avec succès']));
+			return addHeaders($response);
+		} catch (\Exception $e) {
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+			return addHeaders($response);
+		}
+	}
+	
+	function getCartesByUtilisateur(Request $request, Response $response, $args) {
+		global $entityManager;
+		try {
+			$queryParams = $request->getQueryParams();
+			$utilisateurId = $queryParams['utilisateur_id'] ?? null;
+	
+			if (!$utilisateurId) {
+				$response = $response->withStatus(400);
+				$response->getBody()->write(json_encode(['error' => 'Utilisateur ID manquant']));
+				return addHeaders($response);
+			}
+	
+			$cartesRepository = $entityManager->getRepository('Entity\CartesCredit');
+			$cartes = $cartesRepository->findBy(['utilisateur_id' => $utilisateurId]);
+	
+			$data = array_map(function($carte) {
+				return [
+					'id' => $carte->getId(),
+					'utilisateur_id' => $carte->getUtilisateurId(),
+					'numero_carte' => $carte->getNumeroCarte(),
+					'expiration_date' => $carte->getExpirationDate()->format('Y-m-d'),
+					'titulaire' => $carte->getTitulaire(),
+					'cryptogramme' => $carte->getCryptogramme(),
+				];
+			}, $cartes);
+	
+			$response->getBody()->write(json_encode($data));
+			return addHeaders($response);
+		} catch (\Exception $e) {
+			$response = $response->withStatus(500);
+			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+			return addHeaders($response);
+		}
+	}

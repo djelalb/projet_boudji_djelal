@@ -18,7 +18,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	// APi d'authentification générant un JWT
 	$app->post('/api/utilisateur/login', 'postLogin');
 
-	$app->post('/api/utilisateur', 'createUtilisateur');
+	$app->post('/api/utilisateur/signup', 'createUtilisateur');
 	$app->put('/api/utilisateur/{id}', 'updateUtilisateur');
 	$app->delete('/api/utilisateur/{id}', 'deleteUtilisateur');
 
@@ -29,3 +29,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	$app->options('/api/utilisateur/{id}', function (Request $request, Response $response, $args) {
 		return addHeaders($response);
 	});
+
+
+	$app->post('/api/cartes', 'createCarte');
+	$app->put('/api/cartes/{id}', 'updateCarte');
+	$app->delete('/api/cartes/{id}', 'deleteCarte');
+	$app->get('/api/cartes', 'getCartesByUtilisateur');

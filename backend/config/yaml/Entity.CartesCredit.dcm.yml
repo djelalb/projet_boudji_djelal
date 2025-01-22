@@ -1,0 +1,32 @@
+Entity\CartesCredit:
+  type: entity
+  table: cartescredit
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    utilisateur_id:
+      type: integer
+    numero_carte:
+      type: string
+      length: 16
+      nullable: false
+    expiration_date:
+      type: date
+      nullable: false
+    titulaire:
+      type: string
+      nullable: false
+    cryptogramme:
+      type: string
+      length: 3
+      nullable: false
+  manyToOne:
+    utilisateur:
+      targetEntity: Entity\Utilisateurs
+      joinColumn:
+        name: utilisateur_id
+        referencedColumnName: id
+        onDelete: CASCADE

@@ -33,8 +33,11 @@
           name="email"
           placeholder="Email"
           required
+          [class.invalid]="!isEmailValid"
         />
       </div>
+      <p *ngIf="!isEmailValid" class="error-message">Adresse email invalide.</p>
+
       <div class="input-group">
         <i class="fas fa-user"></i>
         <input
@@ -75,8 +78,11 @@
           [(ngModel)]="newUser.telephone"
           name="telephone"
           placeholder="Téléphone"
+          [class.invalid]="!isPhoneValid"
         />
       </div>
+      <p *ngIf="!isPhoneValid" class="error-message">Numéro de téléphone invalide (10-15 chiffres, optionnellement avec un "+").</p>
+
       <button type="submit">S'inscrire</button>
     </form>
     <div *ngIf="error" class="error-message">

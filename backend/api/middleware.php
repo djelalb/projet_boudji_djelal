@@ -38,9 +38,10 @@ $options = [
     "secret" => JWT_SECRET,
     "path" => ["/api"], // Applique le middleware à toutes les routes /api
     "ignore" => [
-        "/api/hello", 
-        "/api/utilisateur/login", 
-        "/api/catalogue", 
+        "/api/hello",
+        "/api/utilisateur/login",
+        "/api/utilisateur/signup",
+        "/api/catalogue",
         "/api/catalogue/{filtre}"
     ], // Routes accessibles sans JWT
     "error" => function ($response, $arguments) {
