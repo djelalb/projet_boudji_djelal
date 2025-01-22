@@ -36,6 +36,11 @@ export class SignupComponent {
       return;
     }
 
+    if (!this.newUser.login || !this.newUser.password) {
+      this.error = 'Veuillez renseigner un identifiant et un mot de passe.';
+      return;
+    }
+
     this.authService.signup(this.newUser).subscribe({
       next: () => {
         alert('Compte créé avec succès.');
