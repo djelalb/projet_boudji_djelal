@@ -21,12 +21,12 @@ export class AccountComponent implements OnInit {
   isEmailValid: boolean = true;
   isPhoneValid: boolean = false;
 
-  creditCards: any[] = [];  // Liste des cartes de crédit
-  newCard: any = { numero_carte: '', expiration_date: '', titulaire: '', cryptogramme: '' };  // Données pour la nouvelle carte
+  creditCards: any[] = [];
+  newCard: any = { utilisateur_id: '', numero_carte: '', expiration_date: '', titulaire: '', cryptogramme: '' };
 
   constructor(
     private authService: AuthService,
-    private apiService: ApiService,  // Injecter ApiService
+    private apiService: ApiService,
     private router: Router
   ) {}
 
@@ -38,8 +38,9 @@ export class AccountComponent implements OnInit {
         const currentUser = this.authService.getCurrentUser();
         if (currentUser && currentUser.id) {
           this.user = currentUser;
+          this.newCard.utilisateur_id = this.user.id;
           this.editableUser = { ...this.user };
-          this.loadCreditCards();  // Charger les cartes de crédit
+          this.loadCreditCards();
         } else {
           console.error('Utilisateur invalide ou ID manquant');
         }
@@ -48,7 +49,7 @@ export class AccountComponent implements OnInit {
   }
 
   loadCreditCards() {
-    this.apiService.getCartesCredit().subscribe(
+    this.apiService.getCartesCredit(this.user.id).subscribe(
       (cards) => {
         this.creditCards = cards;
       },
@@ -98,16 +99,37 @@ export class AccountComponent implements OnInit {
   }
 
   addCreditCard() {
+    if (!this.validateCardData(this.newCard)) {
+      alert('Les données de la carte sont invalides.');
+      return;
+    }
+
     this.apiService.createCarteCredit(this.newCard).subscribe(
       (response) => {
-        this.creditCards.push(response);  // Ajouter la carte à la liste
-        this.newCard = { numero_carte: '', expiration_date: '', titulaire: '', cryptogramme: '' };  // Réinitialiser le formulaire
+        this.creditCards.push(response);
+        this.newCard = { utilisateur_id: this.user.id, numero_carte: '', expiration_date: '', titulaire: '', cryptogramme: '' };
         alert('Carte de crédit ajoutée avec succès!');
       },
       (error) => {
-        console.error('Erreur lors de l\'ajout de la carte de crédit', error);
+        console.error("Erreur lors de l'ajout de la carte de crédit", error);
       }
     );
+  }
+
+  validateCardData(card: any): boolean {
+    if (!/^\d{13,16}$/.test(card.numero_carte)) {
+      console.error("Numéro de carte invalide.");
+      return false;
+    }
+    if (!/^\d{3}$/.test(card.cryptogramme)) {
+      console.error("Cryptogramme invalide.");
+      return false;
+    }
+    if (card.titulaire.trim().length === 0) {
+      console.error("Le nom du titulaire est requis.");
+      return false;
+    }
+    return true;
   }
 
   deleteCreditCard(cardId: number) {

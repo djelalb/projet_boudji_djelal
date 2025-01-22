@@ -30,9 +30,10 @@ export class ApiService {
   }
 
   // Cartes de crédit
-  getCartesCredit(): Observable<CarteCredit[]> {
+  getCartesCredit(utilisateurId: number): Observable<CarteCredit[]> {
     return this.http.get<CarteCredit[]>(`${this.apiUrl}/cartes`, {
       headers: this.getAuthHeaders(),
+      params: { utilisateur_id: utilisateurId.toString() },
     });
   }
 
@@ -43,6 +44,7 @@ export class ApiService {
   }
 
   createCarteCredit(carte: CarteCredit): Observable<CarteCredit> {
+    console.log(carte);
     return this.http.post<CarteCredit>(`${this.apiUrl}/cartes`, carte, {
       headers: this.getAuthHeaders(),
     });
