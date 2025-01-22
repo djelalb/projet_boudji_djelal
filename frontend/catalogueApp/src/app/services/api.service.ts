@@ -9,7 +9,7 @@ import { CarteCredit } from '../models/cartescredit';
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = environmentprod.apiUrl;
 
   constructor(private http: HttpClient) {}
 
