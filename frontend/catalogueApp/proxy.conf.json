@@ -1,6 +1,6 @@
 {
     "/api": {
-        "target": "https://52.41.63.82:8080",
+        "target": "https://10.223.115.133:3000",
         "secure": true,
         "changeOrigin": true,
         "logLevel": "debug"
