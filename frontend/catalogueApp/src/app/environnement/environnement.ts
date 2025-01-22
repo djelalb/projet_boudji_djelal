@@ -4,6 +4,6 @@ export const environment = {
   };
 
 export const environmentprod = {
-  production: true,
-  apiUrl: 'https://cnamappbuild.onrender.com:80/api',
+  production: false,
+  apiUrl: 'https://cnamappbuildapi.onrender.com/api',
 };

@@ -305,6 +305,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	
 			// Extraction des données du corps de la requête
 			$data = $request->getParsedBody();
+
+			error_log("Données reçues : " . json_encode($data));
 	
 			// Vérification de l'utilisateur dans les paramètres de requête
 			$userId = $data['utilisateur_id'] ?? null;
@@ -313,6 +315,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 				$response->getBody()->write(json_encode(['error' => 'Utilisateur ID manquant']));
 				return addHeaders($response);
 			}
+
+			error_log("ID utilisateur : " . $userId);
 	
 			// Récupération de la carte par son ID
 			$carte = $entityManager->find('Entity\CartesCredit', $id);
@@ -321,6 +325,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 				$response->getBody()->write(json_encode(['message' => 'Carte non trouvée']));
 				return addHeaders($response);
 			}
+
+			error_log("Carte trouvée : " . json_encode($carte));
 	
 			// Vérification que la carte appartient à l'utilisateur
 			if ($carte->getUtilisateur()->getId() !== (int)$userId) {
@@ -334,6 +340,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			$carte->setExpirationDate(new \DateTime($data['expiration_date'] ?? $carte->getExpirationDate()->format('Y-m-d')));
 			$carte->setTitulaire($data['titulaire'] ?? $carte->getTitulaire());
 			$carte->setCryptogramme($data['cryptogramme'] ?? $carte->getCryptogramme());
+
+			error_log("Carte après mise à jour : " . json_encode($carte));
 	
 			// Persistance des changements
 			$entityManager->flush();
@@ -388,7 +396,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			}
 	
 			// Vérification de l'existence de l'utilisateur
-			$utilisateur = $entityManager->find('Entity\Utilisateur', $utilisateurId);
+			$utilisateur = $entityManager->find('Entity\Utilisateurs', $utilisateurId);
 			if (!$utilisateur) {
 				$response = $response->withStatus(404);
 				$response->getBody()->write(json_encode(['error' => 'Utilisateur non trouvé']));

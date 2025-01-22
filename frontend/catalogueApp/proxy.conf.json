@@ -1,6 +1,6 @@
 {
   "/api/*": {
-  "target": "https://cnamappbuild.onrender.com/",
+  "target": "https://cnamappbuildapi.onrender.com/",
   "secure": false,
   "logLevel": "debug",
   "changeOrigin": true

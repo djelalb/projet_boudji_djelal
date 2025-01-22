@@ -168,11 +168,15 @@ export class AccountComponent implements OnInit {
   }
 
   onUpdateCard(event: { id: number; carte: Partial<CarteCredit> }): void {
-    console.log("Carte numéro", event.id, "mise à jour avec", event.carte);
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      console.error('Utilisateur non connecté');
+      return;
+    }
+    const userId = JSON.parse(currentUser).id;
     const { id, carte } = event;
-    this.apiService.updateCarteCredit(id, carte).subscribe(
+    this.apiService.updateCarteCredit(id, carte, userId).subscribe(
       (updatedCard) => {
-        console.log('Carte mise à jour', updatedCard);
         const index = this.creditCards.findIndex((card) => card.id === id);
         if (index !== -1) {
           this.creditCards[index] = { ...this.creditCards[index], ...updatedCard };

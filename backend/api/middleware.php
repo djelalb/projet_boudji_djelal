@@ -53,9 +53,6 @@ $options = [
     }
 ];
 
-// Ajout du middleware au framework Slim
-$app->add(new JwtAuthentication($options));
-
 // Fonction pour ajouter les headers CORS et de contenu
 function addHeaders(Response $response): Response {
     return $response
@@ -66,4 +63,6 @@ function addHeaders(Response $response): Response {
         ->withHeader('Access-Control-Expose-Headers', 'Authorization');
 }
 
+// Ajout du middleware au framework Slim
+$app->add(new JwtAuthentication($options));
 $app->addBodyParsingMiddleware();
