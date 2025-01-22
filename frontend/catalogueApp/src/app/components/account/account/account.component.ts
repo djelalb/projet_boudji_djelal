@@ -152,13 +152,8 @@ export class AccountComponent implements OnInit {
     }
     const userId = JSON.parse(currentUser).id;
     this.apiService.createCarteCredit(newCard, userId).subscribe(
-      (response) => {
-        const addedCard = {
-          ...newCard,
-          ...response
-        };
-
-        this.creditCards.push(addedCard);
+      () => {
+        this.loadCreditCards();
         alert('Carte de crédit ajoutée avec succès!');
       },
       (error) => {

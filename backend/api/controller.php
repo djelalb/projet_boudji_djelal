@@ -266,7 +266,13 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			$entityManager->persist($carte);
 			$entityManager->flush();
 
-			$response->getBody()->write(json_encode(['message' => 'Carte créée avec succès']));
+			$response->getBody()->write(json_encode([
+				'id' => $carte->getId(),
+				'numero_carte' => $carte->getNumeroCarte(),
+				'expiration_date' => $carte->getExpirationDate()->format('Y-m-d'),
+				'titulaire' => $carte->getTitulaire(),
+				'cryptogramme' => $carte->getCryptogramme(),
+			]));
 			return addHeaders($response);
 		} catch (\Exception $e) {
 			error_log("Erreur lors de la création de la carte : " . $e->getMessage());
@@ -280,15 +286,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		global $entityManager;
 	
 		try {
-			// Récupération de l'ID de la carte depuis les paramètres de route
 			$id = $args['id'];
-	
-			// Extraction des données du corps de la requête
 			$data = $request->getParsedBody();
 
 			error_log("Données reçues : " . json_encode($data));
-	
-			// Vérification de l'utilisateur dans les paramètres de requête
+
 			$userId = $data['utilisateur_id'] ?? null;
 			if (!$userId) {
 				$response = $response->withStatus(400);
@@ -297,8 +299,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			}
 
 			error_log("ID utilisateur : " . $userId);
-	
-			// Récupération de la carte par son ID
 			$carte = $entityManager->find('Entity\CartesCredit', $id);
 			if (!$carte) {
 				$response = $response->withStatus(404);
@@ -307,37 +307,28 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 			}
 
 			error_log("Carte trouvée : " . json_encode($carte));
-	
-			// Vérification que la carte appartient à l'utilisateur
 			if ($carte->getUtilisateur()->getId() !== (int)$userId) {
 				$response = $response->withStatus(403);
 				$response->getBody()->write(json_encode(['error' => 'Accès non autorisé à cette carte']));
 				return addHeaders($response);
 			}
-	
-			// Mise à jour des informations de la carte
+
 			$carte->setNumeroCarte($data['numero_carte'] ?? $carte->getNumeroCarte());
 			$carte->setExpirationDate(new \DateTime($data['expiration_date'] ?? $carte->getExpirationDate()->format('Y-m-d')));
 			$carte->setTitulaire($data['titulaire'] ?? $carte->getTitulaire());
 			$carte->setCryptogramme($data['cryptogramme'] ?? $carte->getCryptogramme());
 
 			error_log("Carte après mise à jour : " . json_encode($carte));
-	
-			// Persistance des changements
 			$entityManager->flush();
-	
-			// Réponse de succès
+
 			$response->getBody()->write(json_encode(['message' => 'Carte mise à jour avec succès']));
 			return addHeaders($response);
-	
 		} catch (\Exception $e) {
-			// Gestion des erreurs
 			$response = $response->withStatus(500);
 			$response->getBody()->write(json_encode(['error' => $e->getMessage()]));
 			return addHeaders($response);
 		}
 	}
-	
 
 	function deleteCarte(Request $request, Response $response, $args) {
 		global $entityManager;
