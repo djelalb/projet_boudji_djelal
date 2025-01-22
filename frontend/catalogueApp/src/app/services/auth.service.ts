@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { environment } from '../environnement/environnement';
+import { environment, environmentprod } from '../environnement/environnement';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +22,7 @@ export class AuthService {
   }
 
   login(credentials: { login: string; password: string }): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/utilisateur/login`, credentials).pipe(
+    return this.http.post(`${environmentprod.apiUrl}/utilisateur/login`, credentials).pipe(
       tap((response: any) => {
         if (response.token) {
           this.storeAccessToken(response.token);
@@ -54,7 +54,7 @@ export class AuthService {
     }
 
   signup(user: { login: string; password: string; nom: string; prenom: string; email: string; adresse?: string; telephone?: string }): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/utilisateur/signup`, user);
+    return this.http.post(`${environmentprod.apiUrl}/utilisateur/signup`, user);
   }
 
   logout(): void {
@@ -84,7 +84,7 @@ export class AuthService {
 
   updateUser(user: { id: number; nom?: string; prenom?: string; email?: string; adresse?: string; telephone?: string }): Observable<any> {
     const headers = this.getAuthHeaders();
-    return this.http.put(`${environment.apiUrl}/utilisateur/${user.id}`, user, { headers }).pipe(
+    return this.http.put(`${environmentprod.apiUrl}/utilisateur/${user.id}`, user, { headers }).pipe(
       tap((updatedUser: any) => {
         if (this.currentUser && updatedUser) {
           // Mettez à jour les informations utilisateur dans le localStorage
@@ -98,7 +98,7 @@ export class AuthService {
   deleteAccount(userId: number): Observable<any> {
     console.log('Suppression du compte utilisateur', userId);
     const headers = this.getAuthHeaders();
-    return this.http.delete(`${environment.apiUrl}/utilisateur/${userId}`, { headers }).pipe(
+    return this.http.delete(`${environmentprod.apiUrl}/utilisateur/${userId}`, { headers }).pipe(
       tap(() => {
         this.logout();
       })

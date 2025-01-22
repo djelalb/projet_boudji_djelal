@@ -1,8 +1,8 @@
 {
     "/api": {
-        "target": "http://localhost:8080",
+        "target": "http://52.41.63.82:8080",
         "secure": true,
         "changeOrigin": true,
         "logLevel": "debug"
     }
-} 
+}
