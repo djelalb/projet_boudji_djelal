@@ -114,68 +114,44 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 	}
 
 	// APi d'authentification générant un JWT
-	function postLogin (Request $request, Response $response, $args) {
+	function postLogin(Request $request, Response $response, $args) {
 		global $entityManager;
 		try {
-			error_log("Début postLogin");
-
 			$body = $request->getParsedBody();
-			error_log("Body reçu : " . json_encode($body));
-
-			if ($body === null) {
-				$body = json_decode($request->getBody()->getContents(), true);
-				error_log("Body après json_decode : " . json_encode($body));
-			}
 			$login = $body['login'] ?? "";
 			$password = $body['password'] ?? "";
-
-			error_log("Login: " . $login . ", Password: " . $password);
 
 			if (!$entityManager) {
 				throw new Exception("EntityManager non initialisé");
 			}
 
-			try {
-				$userRepository = $entityManager->getRepository('Entity\Utilisateurs');
-				error_log("Repository obtenu");
+			$userRepository = $entityManager->getRepository('Entity\Utilisateurs');
+			$user = $userRepository->findOneBy(['login' => $login]);
 
-				$user = $userRepository->findOneBy(['login' => $login, 'password' => $password]);
-				error_log("Recherche utilisateur effectuée");
+			if ($user && password_verify($password, $user->getPassword())) {
+				// Création du JWT
+				$response = addHeaders($response);
+				$response = createJwt($response); 
 
-				if ($user) {
-					error_log("Utilisateur trouvé");
-
-					// Création du JWT
-					$response = addHeaders($response);
-					$response = createJwt($response); 
-
-					// Prépare les données à renvoyer
-					$userData = array(
-						'id' => $user->getId(),
-						'login' => $user->getLogin(),
-						'nom' => $user->getNom(),
-						'prenom' => $user->getPrenom(),
-						'email' => $user->getEmail(),
-						'adresse' => $user->getAdresse(),
-						'telephone' => $user->getTelephone()
-					);
-					$data = array(
-						'token' => str_replace("Bearer ", "", $response->getHeader('Authorization')[0]),
-						'user' => $userData
-					);
-
-					$response->getBody()->write(json_encode($data));
-				} else {
-					error_log("Utilisateur non trouvé");
-					$response = $response->withStatus(403);
-					$response->getBody()->write(json_encode(['error' => 'Identifiants invalides']));
-				}
-			} catch (Exception $e) {
-				error_log("Erreur Doctrine : " . $e->getMessage());
-				throw $e;
+				$userData = array(
+					'id' => $user->getId(),
+					'login' => $user->getLogin(),
+					'nom' => $user->getNom(),
+					'prenom' => $user->getPrenom(),
+					'email' => $user->getEmail(),
+					'adresse' => $user->getAdresse(),
+					'telephone' => $user->getTelephone()
+				);
+				$data = array(
+					'token' => str_replace("Bearer ", "", $response->getHeader('Authorization')[0]),
+					'user' => $userData
+				);
+				$response->getBody()->write(json_encode($data));
+			} else {
+				$response = $response->withStatus(403);
+				$response->getBody()->write(json_encode(['error' => 'Identifiants invalides']));
 			}
-		} catch (Exception $e) {
-			error_log("Erreur finale : " . $e->getMessage());
+		} catch (\Exception $e) {
 			$response = $response->withStatus(500);
 			$response->getBody()->write(json_encode([
 				'error' => 'Erreur serveur',
@@ -190,17 +166,21 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 		global $entityManager;
 		try {
 			$data = $request->getParsedBody();
+
+			// Hachage du mot de passe
+			$hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+
 			$utilisateur = new \Entity\Utilisateurs();
 			$utilisateur->setNom($data['nom']);
 			$utilisateur->setPrenom($data['prenom']);
 			$utilisateur->setLogin($data['login']);
-			$utilisateur->setPassword($data['password']);
+			$utilisateur->setPassword($hashedPassword);
 			$utilisateur->setEmail($data['email']);
 			$utilisateur->setAdresse($data['adresse']);
 			$utilisateur->setTelephone($data['telephone']);
+
 			$entityManager->persist($utilisateur);
 			$entityManager->flush();
-
 			$response->getBody()->write(json_encode(['message' => 'Utilisateur créé avec succès']));
 			return addHeaders($response);
 		} catch (\Exception $e) {
