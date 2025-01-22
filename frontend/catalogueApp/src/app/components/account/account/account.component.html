@@ -70,6 +70,7 @@
       <app-credit-card
         [creditCards]="creditCards"
         (deleteCard)="deleteCreditCard($event)"
+        (updateCard)="onUpdateCard($event)"
       ></app-credit-card>
       <app-add-credit-card
         [userId]="user?.id"

@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CreditCardComponent } from '../../credit-card/credit-card.component';
 import { AddCreditCardComponent } from '../../../add-credit-card/add-credit-card.component';
+import { CarteCredit } from '../../../models/cartescredit';
 
 @Component({
   selector: 'app-account',
@@ -144,7 +145,13 @@ export class AccountComponent implements OnInit {
   }
 
   handleCardAdded(newCard: any) {
-    this.apiService.createCarteCredit(newCard).subscribe(
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      console.error('Utilisateur non connecté');
+      return;
+    }
+    const userId = JSON.parse(currentUser).id;
+    this.apiService.createCarteCredit(newCard, userId).subscribe(
       (response) => {
         const addedCard = {
           ...newCard,
@@ -156,6 +163,23 @@ export class AccountComponent implements OnInit {
       },
       (error) => {
         console.error('Erreur lors de l\'ajout de la carte de crédit', error);
+      }
+    );
+  }
+
+  onUpdateCard(event: { id: number; carte: Partial<CarteCredit> }): void {
+    console.log("Carte numéro", event.id, "mise à jour avec", event.carte);
+    const { id, carte } = event;
+    this.apiService.updateCarteCredit(id, carte).subscribe(
+      (updatedCard) => {
+        console.log('Carte mise à jour', updatedCard);
+        const index = this.creditCards.findIndex((card) => card.id === id);
+        if (index !== -1) {
+          this.creditCards[index] = { ...this.creditCards[index], ...updatedCard };
+        }
+      },
+      (error) => {
+        console.error('Erreur lors de la mise à jour de la carte', error);
       }
     );
   }

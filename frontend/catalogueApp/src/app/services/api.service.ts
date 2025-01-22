@@ -9,7 +9,7 @@ import { CarteCredit } from '../models/cartescredit';
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = environmentprod.apiUrl;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -43,14 +43,14 @@ export class ApiService {
     });
   }
 
-  createCarteCredit(carte: CarteCredit): Observable<CarteCredit> {
-    console.log(carte);
-    return this.http.post<CarteCredit>(`${this.apiUrl}/cartes`, carte, {
+  createCarteCredit(carte: CarteCredit, userId: number): Observable<CarteCredit> {
+    const body = { ...carte, utilisateur_id: userId };
+    return this.http.post<CarteCredit>(`${this.apiUrl}/cartes`, body, {
       headers: this.getAuthHeaders(),
     });
   }
 
-  updateCarteCredit(id: number, carte: CarteCredit): Observable<CarteCredit> {
+  updateCarteCredit(id: number, carte: Partial<CarteCredit>): Observable<CarteCredit> {
     return this.http.put<CarteCredit>(`${this.apiUrl}/cartes/${id}`, carte, {
       headers: this.getAuthHeaders(),
     });
